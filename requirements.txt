@@ -1,4 +1,7 @@
 streamlit
-deep-translator
+transformers
+torch
+sentencepiece
 gTTS
+googletrans==4.0.0rc1
 anuvaad
