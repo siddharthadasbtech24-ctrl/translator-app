@@ -10,14 +10,15 @@ LANG_CODES = {"Hindi": "hi", "Kannada": "kn", "Tamil": "ta", "Telugu": "te", "Ma
 # Models supported by Anuvaad
 ANU_MODEL = {"Hindi": "english-hindi"}  # ✅ only Hindi works
 
-translator = Translator()
+from deep_translator import GoogleTranslator
 
 def translate_sentence(sentence, lang_choice):
-    if lang_choice == "Hindi":  # Use Anuvaad
-        anu = Anuvaad("english-hindi")
-        return anu.anuvaad(sentence)
-    else:  # Fallback to googletrans
-        return translator.translate(sentence, dest=LANG_CODES[lang_choice]).text
+    # Use deep-translator for all languages
+    translated_text = GoogleTranslator(
+        source="en",
+        target=TTS_CODES[lang_choice]  # example: "hi", "kn", "ta"
+    ).translate(sentence)
+    return translated_text
 
 def text_to_speech(text, lang_choice):
     tts = gTTS(text=text, lang=LANG_CODES[lang_choice])
