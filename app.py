@@ -1,44 +1,54 @@
 import streamlit as st
-from anuvaad import Anuvaad
-from gtts import gTTS
 from googletrans import Translator
-import tempfile, os
+from gtts import gTTS
+import tempfile
+import os
 
-# gTTS language codes
-LANG_CODES = {"Hindi": "hi", "Kannada": "kn", "Tamil": "ta", "Telugu": "te", "Malayalam": "ml"}
-
-# Models supported by Anuvaad
-ANU_MODEL = {"Hindi": "english-hindi"}  # ✅ only Hindi works
+# Language mappings
+LANGUAGES = {
+    "Hindi": "hi",
+    "Kannada": "kn",
+    "Tamil": "ta",
+    "Telugu": "te",
+    "Malayalam": "ml",
+}
 
 translator = Translator()
 
-def translate_sentence(sentence, lang_choice):
-    if lang_choice == "Hindi":  # Use Anuvaad
-        anu = Anuvaad("english-hindi")
-        return anu.anuvaad(sentence)
-    else:  # Fallback to googletrans
-        return translator.translate(sentence, dest=LANG_CODES[lang_choice]).text
+def translate_text(sentence, lang_choice):
+    try:
+        result = translator.translate(sentence, dest=LANGUAGES[lang_choice])
+        return result.text
+    except Exception as e:
+        return f"Translation failed: {e}"
 
 def text_to_speech(text, lang_choice):
-    tts = gTTS(text=text, lang=LANG_CODES[lang_choice])
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-    tts.save(tmp.name)
-    return tmp.name
+    tts = gTTS(text=text, lang=LANGUAGES[lang_choice])
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+    tts.save(temp_file.name)
+    return temp_file.name
 
-st.title("Translator (EN → Indian Languages) with Voice")
+# Streamlit UI
+st.title("🧠 Multi-Language Translator (EN ➡ Indian Languages) with Voice")
 
-lang_choice = st.selectbox("Target language:", list(LANG_CODES.keys()))
-sentence = st.text_input("English sentence:")
+lang_choice = st.selectbox("Select target language:", options=list(LANGUAGES.keys()))
+
+sentence = st.text_input("Enter a sentence in English:")
 
 if st.button("Translate"):
-    if not sentence.strip():
+    if sentence.strip() == "":
         st.warning("Bruh, enter something first.")
     else:
+        with st.spinner("Translating..."):
+            translation = translate_text(sentence, lang_choice)
+        
+        st.success(f"Translation in {lang_choice}: {translation}")
+
+        # TTS
         try:
-            translation = translate_sentence(sentence, lang_choice)
-            st.success(f"{lang_choice}: {translation}")
             audio_file = text_to_speech(translation, lang_choice)
-            st.audio(open(audio_file, "rb").read(), format="audio/mp3")
+            audio_bytes = open(audio_file, "rb").read()
+            st.audio(audio_bytes, format="audio/mp3")
             os.remove(audio_file)
         except Exception as e:
-            st.error(f"Error for {lang_choice}: {e}")
+            st.error(f"TTS failed: {e}")
