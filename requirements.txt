@@ -1,7 +1,7 @@
 streamlit
 gTTS
 googletrans==4.0.0-rc1
+anuvaad
 transformers
 torch
 sentencepiece
-git+https://github.com/Open-Sanskrit/anuvaad.git
