@@ -1,3 +1,4 @@
 streamlit
-gtts
 deep-translator
+gTTS
+anuvaad
